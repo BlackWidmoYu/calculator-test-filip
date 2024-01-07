@@ -2,10 +2,10 @@ import tkinter as tk
 from enum import Enum, auto
 
 class NumericSystem(Enum):
-    BIN = "01"
-    DEC = "0123456789"
-    HEX = "0123456789ABCDEF"
-    OCT = "01234567"
+    BIN = ("01", 2)
+    DEC = ("0123456789", 10)
+    HEX = ("0123456789ABCDEF", 16)
+    OCT = ("01234567", 8)
 
 class DataType(Enum):
     byte  = '8'
@@ -30,43 +30,50 @@ class Operation(Enum):
 
 class Calculator:
     def __init__(self):
-        self.expression = ""
+        self.last_number = "0"
+        self.change_number = False
+        self.expression = "0"
         self.result = ""
-        self.operation = Operation.NONE.value
+        self.operation = Operation.NONE.value[0]
         self.numeric_system = NumericSystem.DEC
         self.sign = Sign.POSITIVE
         self.data_type = DataType.qword
     
     def is_input_valid(self, input):
         for char in input:
-            if char not in self.numeric_system.value:
+            if char not in self.numeric_system.value[0]:
                 return False
         return True
     
-    def get_system_input_representation(self, input):
+    def get_system_input_representation(self, input, old_numeric_system_value=10):
         if self.numeric_system == NumericSystem.BIN:
-            return bin(int(input))
+            return bin(int(input, old_numeric_system_value))
         elif self.numeric_system == NumericSystem.OCT:
-            return oct(int(input))
+            return oct(int(input, old_numeric_system_value))
         elif self.numeric_system == NumericSystem.DEC:
-            return int(input)
+            return int(input, old_numeric_system_value)
         elif self.numeric_system == NumericSystem.HEX:
-            print(input)
-            return hex(int(input))
+            return hex(int(input, old_numeric_system_value)).upper().replace('X', 'x')
 
     def add_input(self, input):
+        zeroes = ("0", "0b0", "0x0", "0o0")
         if (self.is_input_valid(input)):
-            number = self.get_system_input_representation(input)
-            print("Added num:", number)
-            if self.expression == "0":
+            number = self.get_system_input_representation(input, self.numeric_system.value[1])
+            if self.expression in zeroes:
                 self.expression = str(number)
+                self.last_number = str(number)
             else:
-                self.expression += str(number)
-            if self.operation != Operation.NONE.value:
-                self.perform_operation()
-        elif input != Operation.NONE.value and any(input in member.value for member in Operation):
+                if self.change_number:
+                    self.last_number = str(number)
+                    self.expression += str(number)
+                    self.change_number = False
+                else:
+                    self.last_number += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
+                    self.expression += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
+        elif input != Operation.NONE.value[0] and any(input in member.value[0] for member in Operation):
             self.expression += input
             self.operation = input
+            self.change_number = True
         else:
             print("Wrong input:", input)
     
@@ -75,19 +82,23 @@ class Calculator:
         try:
             self.result = self.get_system_input_representation(str(eval(self.expression.replace("/", "//"))))
             self.expression = str(self.result)
+            self.last_number = str(self.result)
             print("Result:", self.result)
         except:
             print("Wrong expression:", self.expression)
             self.result = 0
             self.expression = "0"
-        self.operation = Operation.NONE.value
+            self.last_number = "0"
+        self.operation = Operation.NONE.value[0]
     def get_result(self):
         return self.result
     
     def change_numeric_system(self, new_numeric_system):
         if isinstance(new_numeric_system, NumericSystem):
+            old_numeric_system_value = self.numeric_system.value[1]
             self.numeric_system = new_numeric_system
-            self.expression = self.get_system_input_representation(self.expression)
+            self.expression = str(self.get_system_input_representation(self.last_number, old_numeric_system_value))
+            self.last_number = self.expression
         else:
             print("Wrong numeric system:", new_numeric_system)
 
@@ -98,40 +109,79 @@ class CalculatorGUI(tk.Tk):
         self.calculator = calculator
 
         self.title("Calculator")
+        self.resizable(False, False)
 
         self.result_var = tk.StringVar()
         self.result_var.set("0")
 
         self.create_widgets()
 
+    def activate_buttons(self):
+        active_numbers = self.calculator.numeric_system.value[0]
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Button) and widget.cget("text") in NumericSystem.HEX.value[0]:
+                button_text = widget.cget("text")
+                widget["state"] = tk.NORMAL if button_text in active_numbers else tk.DISABLED
+
     def create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Arial', 14), bd=10, insertwidth=4, width=14,
                          justify='right', state='readonly')
-        entry.grid(row=0, column=0, columnspan=4)
+        entry.grid(row=0, column=1, columnspan=5)
 
-        for i in range(9, -1, -1):
-            tk.Button(self, text=str(i), command=lambda num=i: self.on_button_click(str(num))).grid(
-                row=(9 - i) // 3 + 1, column=(8 - i) % 3)
-        operations = ['+', '-', '*', '/', '&', '|', '^', '=']
-        for i, op in enumerate(operations):
-            tk.Button(self, text=op, command=lambda o=op: self.on_button_click(o)).grid(row=i // 2 + 1, column=3 + i % 2)
 
-        tk.Button(self, text="Change System", command=self.change_numeric_system).grid(row=5, column=3)
+        hex_buttons = ['A', 'B', 'C', 'D', 'E', 'F']
+        for i, hex_num in enumerate(hex_buttons):
+            tk.Button(self, text=hex_num, command=lambda h=hex_num: self.on_button_click(h), width=2).grid(row=i+1, column=0)
+
+        numeric_buttons = [
+            '7', '8', '9',
+            '4', '5', '6',
+            '1', '2', '3',
+            '0'
+        ]
+
+        for i, num in enumerate(numeric_buttons):
+            row_index = i // 3 + 1
+            col_index = i % 3 + 2
+            tk.Button(self, text=num, command=lambda n=num: self.on_button_click(n), width=2).grid(row=row_index+2, column=col_index)
+
+        operation_buttons = ['+', '-', '*', '/', '&', '|', '^', '=']
+        for i, op in enumerate(operation_buttons):
+            tk.Button(self, text=op, command=lambda o=op: self.on_button_click(o), width=2).grid(row=i+2 if i < 4 else i-2, column=5 if i < 4 else 6)
+
+        system_buttons = ['Dec', 'Bin', 'Oct', 'Hex']
+        for i, sys in enumerate(system_buttons):
+            tk.Button(self, text=sys, command=lambda s=sys: self.change_numeric_system(s), width=2).grid(row=7, column=i+2)
+
+        self.activate_buttons()
 
     def on_button_click(self, value):
-        self.calculator.add_input(value)
-        self.result_var.set(str(self.calculator.expression))
+        if value == '=':
+            self.calculator.perform_operation()
+        else:
+            self.calculator.add_input(value)
+        self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
         print("Current Expression:", self.calculator.expression)
 
-    def change_numeric_system(self):
-        new_system = NumericSystem.HEX if self.calculator.numeric_system == NumericSystem.DEC else NumericSystem.DEC
-        self.calculator.change_numeric_system(new_system)
-        self.result_var.set(str(self.calculator.expression))
-        print("Changed Numeric System to:", new_system)
+    def change_numeric_system(self, system):
+        new_system = None
+        if system == 'Dec':
+            new_system = NumericSystem.DEC
+        elif system == 'Bin':
+            new_system = NumericSystem.BIN
+        elif system == 'Oct':
+            new_system = NumericSystem.OCT
+        elif system == 'Hex':
+            new_system = NumericSystem.HEX
+
+        if new_system:
+            self.calculator.change_numeric_system(new_system)
+            self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
+            print("Changed Numeric System to:", new_system)
+            self.activate_buttons()
 
 
 if __name__ == "__main__":
     calculator = Calculator()
-    print(eval("77/7"))
     calculator_gui = CalculatorGUI(calculator)
     calculator_gui.mainloop()
