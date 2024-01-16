@@ -56,10 +56,14 @@ class Calculator:
     def update_binary_representation(self):
         old_binary_representation = self.binary_representation
         numeric_value = int(self.last_number, self.numeric_system.value[1])
-        binary_representation = bin(numeric_value)
-
+        
         data_type_length = int(self.data_type.value)
-        self.binary_representation = binary_representation[:2] + binary_representation[2:].zfill(data_type_length)
+        
+        if self.sign == Sign.NEGATIVE:
+            max_value = 2 ** data_type_length
+            numeric_value = (numeric_value + max_value) % max_value
+
+        binary_representation = bin(numeric_value)[2:].zfill(data_type_length)
 
         if not self.is_binary_representation_within_bounds():
             print(f"Input exceeds the maximum value for {self.data_type.value} data type.")
@@ -67,12 +71,14 @@ class Calculator:
             self.last_number = str(self.get_system_input_representation(old_binary_representation, 2))
             self.binary_representation = old_binary_representation
             return False
+
+        self.binary_representation = binary_representation
         print(self.binary_representation)
         
     def is_binary_representation_within_bounds(self):
-        print("Abs: ", abs(int(self.binary_representation, 2)))
+        print("Abs: ", abs(int(self.last_number, self.numeric_system.value[1])))
         print("Max value: ", self.max_value)
-        return abs(int(self.binary_representation, 2)) <= self.max_value
+        return abs(int(self.last_number, self.numeric_system.value[1])) <= self.max_value
 
     def update_max_value(self):
         self.max_value = self.get_current_max_value()
@@ -135,6 +141,11 @@ class Calculator:
             self.result = 0
             self.expression = "0"
             self.last_number = "0"
+
+        if str(self.result).startswith('-'):
+            self.sign = Sign.NEGATIVE
+        else:
+            self.sign = Sign.POSITIVE
         
         self.update_binary_representation()
         self.operation = Operation.NONE.value[0]
@@ -144,9 +155,16 @@ class Calculator:
     
     def change_data_type(self, new_data_type):
         if isinstance(new_data_type, DataType):
+            old_sign_bit = self.binary_representation[0]
             self.data_type = new_data_type
             self.update_max_value()
             self.update_binary_representation()
+
+            if old_sign_bit == '1':
+                self.sign = Sign.NEGATIVE
+            else:
+                self.sign = Sign.POSITIVE
+
             print("Changed Data Type to:", new_data_type)
         else:
             print("Wrong data type:", new_data_type)
