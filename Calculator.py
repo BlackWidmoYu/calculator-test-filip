@@ -8,8 +8,8 @@ class NumericSystem(Enum):
     OCT = ("01234567", 8)
 
 class DataType(Enum):
-    byte = '8'
-    word = '16'
+    byte  = '8'
+    word  = '16'
     dword = '32'
     qword = '64'
 
@@ -134,7 +134,6 @@ class CalculatorGUI(tk.Tk):
                 button_text = widget.cget("text")
                 widget["state"] = tk.NORMAL if button_text in active_numbers or button_text == "CE" else tk.DISABLED
                 
-
     def create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Arial', 14), bd=10, insertwidth=4, width=14,
                          justify='right', state='readonly')
