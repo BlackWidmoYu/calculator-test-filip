@@ -17,6 +17,11 @@ class GeneralTests(unittest.TestCase):
         calc = Calculator()
         self.assertEqual(calc.numeric_system, NumericSystem.DEC)
 
+    # Test sprawdzajacy domyslny data type
+    def test_check_datatype(self):
+        calc = Calculator()
+        self.assertEqual(calc.data_type, DataType.qword)
+
 # Testy do sprawdzenia przyjmowania znakow dla roznych systemow
 class InputTests(unittest.TestCase):
     def test_check_dec_input_positive(self):
@@ -102,6 +107,122 @@ class NumericSystemTests(unittest.TestCase):
             self.assertEqual(calc.last_number, expected_values[i])
             self.assertEqual(calc.numeric_system, NumericSystem.OCT)
     
+    def test_oct_to_dec(self):
+        input_values = ['0o1', '0o14', '0o377', '0o2541']
+        expected_values = ['1', '12', '255', '1377']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.OCT
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.DEC)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.DEC)
+
+    def test_oct_to_hex(self):
+        input_values = ['0o1', '0o14', '0o377', '0o2541']
+        expected_values = ['0x1', '0xC', '0xFF', '0x561']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.OCT
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.HEX)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.HEX)
+
+    def test_oct_to_bin(self):
+        input_values = ['0o1', '0o14', '0o377', '0o2541']
+        expected_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.OCT
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.BIN)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.BIN)
+
+    def test_bin_to_dec(self):
+        input_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+        expected_values = ['1', '12', '255', '1377']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.BIN
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.DEC)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.DEC)
+
+    def test_bin_to_hex(self):
+        input_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+        expected_values = ['0x1', '0xC', '0xFF', '0x561']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.BIN
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.HEX)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.HEX)
+
+    def test_bin_to_oct(self):
+        input_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+        expected_values = ['0o1', '0o14', '0o377', '0o2541']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.BIN
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.OCT)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.OCT)
+
+    def test_hex_to_dec(self):
+        input_values = ['0x1', '0xC', '0xFF', '0x561']
+        expected_values = ['1', '12', '255', '1377']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.HEX
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.DEC)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.DEC)
+
+    def test_hex_to_oct(self):
+        input_values = ['0x1', '0xC', '0xFF', '0x561']
+        expected_values = ['0o1', '0o14', '0o377', '0o2541']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.HEX
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.OCT)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.OCT)
+
+    def test_hex_to_bin(self):
+        input_values = ['0x1', '0xC', '0xFF', '0x561']
+        expected_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+
+        for i in range(len(input_values)):
+            calc = Calculator()
+            calc.numeric_system = NumericSystem.HEX
+            calc.last_number = input_values[i]
+            calc.change_numeric_system(NumericSystem.BIN)
+
+            self.assertEqual(calc.last_number, expected_values[i])
+            self.assertEqual(calc.numeric_system, NumericSystem.BIN)
 
 
 

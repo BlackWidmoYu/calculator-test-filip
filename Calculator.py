@@ -1,5 +1,6 @@
 import tkinter as tk
 from enum import Enum, auto
+import sys
 
 class NumericSystem(Enum):
     BIN = ("01", 2)
@@ -8,10 +9,10 @@ class NumericSystem(Enum):
     OCT = ("01234567", 8)
 
 class DataType(Enum):
-    byte  = '8'
-    word  = '16'
-    dword = '32'
-    qword = '64'
+    byte  = '1'
+    word  = '2'
+    dword = '4'
+    qword = '8'
 
 class Sign(Enum):
     POSITIVE = auto()
@@ -27,6 +28,10 @@ class Operation(Enum):
     XOR = '^'
     NONE = 'NONE'
 
+def twos(val_str, bytes):
+    val = int(val_str, 2)
+    b = val.to_bytes(bytes, byteorder=sys.byteorder, signed=False)                                                          
+    return int.from_bytes(b, byteorder=sys.byteorder, signed=True)
 
 class Calculator:
     def __init__(self):
@@ -54,11 +59,21 @@ class Calculator:
         elif self.data_type == DataType.qword:
             return 2**63 - 1
         
+    def get_current_min_value(self):
+        if self.data_type == DataType.byte:
+            return -2**7
+        elif self.data_type == DataType.word:
+            return -2**15
+        elif self.data_type == DataType.dword:
+            return -2**31
+        elif self.data_type == DataType.qword:
+            return -2**63
+        
     def update_binary_representation(self):
         old_binary_representation = self.binary_representation
         numeric_value = int(self.last_number, self.numeric_system.value[1])
         
-        data_type_length = int(self.data_type.value)
+        data_type_length = int(self.data_type.value) * 8
         
         if self.sign == Sign.NEGATIVE:
             max_value = 2 ** data_type_length
@@ -67,7 +82,7 @@ class Calculator:
         binary_representation = bin(numeric_value)[2:].zfill(data_type_length)
 
         if not self.is_binary_representation_within_bounds():
-            print(f"Input exceeds the maximum value for {self.data_type.value} data type.")
+            print(f"Input exceeds the maximum value or minimum value for {int(self.data_type.value) * 8} data type.")
             self.expression = str(self.get_system_input_representation(old_binary_representation, 2))
             self.last_number = str(self.get_system_input_representation(old_binary_representation, 2))
             self.binary_representation = old_binary_representation
@@ -79,7 +94,7 @@ class Calculator:
     def is_binary_representation_within_bounds(self):
         print("Abs: ", abs(int(self.last_number, self.numeric_system.value[1])))
         print("Max value: ", self.max_value)
-        return abs(int(self.last_number, self.numeric_system.value[1])) <= self.max_value
+        return int(self.last_number, self.numeric_system.value[1]) <= self.max_value and int(self.last_number, self.numeric_system.value[1]) >= self.get_current_min_value()
 
     def update_max_value(self):
         self.max_value = self.get_current_max_value()
@@ -156,15 +171,20 @@ class Calculator:
     
     def change_data_type(self, new_data_type):
         if isinstance(new_data_type, DataType):
+            old_data_type = self.data_type
             old_sign_bit = self.binary_representation[0]
             self.data_type = new_data_type
             self.update_max_value()
-            self.update_binary_representation()
+            if int(self.data_type.value) < int(old_data_type.value):
+                self.last_number = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value)))))
+                self.expression = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value)))))
+            print("Changed to ", self.last_number)
 
-            if old_sign_bit == '1':
+            if old_sign_bit == '1' or int(self.last_number, self.numeric_system.value[1]) < 0:
                 self.sign = Sign.NEGATIVE
             else:
                 self.sign = Sign.POSITIVE
+            self.update_binary_representation()
 
             print("Changed Data Type to:", new_data_type)
         else:
