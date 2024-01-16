@@ -30,12 +30,9 @@ class Operation(Enum):
 
 def twos(val_str, bytes, max_value, data_type_value):
     val = int(val_str[-int(data_type_value)*8:], 2)
-    print("Before val: ", val)
     val_binary = str(bin(val)).replace("0b", "")
     if val >= 0 and val_binary[0] != '1':
-        print(f"{val} % {int(max_value)}")
         val = val % (int(max_value) + 1)
-        print("After val: ", val)
     b = val.to_bytes(bytes, byteorder=sys.byteorder, signed=False)                                                          
     return int.from_bytes(b, byteorder=sys.byteorder, signed=True)
 
@@ -95,7 +92,6 @@ class Calculator:
             return False
 
         self.binary_representation = binary_representation
-        print(self.binary_representation)
         
     def is_binary_representation_within_bounds(self):
         return int(self.last_number, self.numeric_system.value[1]) <= self.max_value and int(self.last_number, self.numeric_system.value[1]) >= self.get_current_min_value()
@@ -150,14 +146,11 @@ class Calculator:
             return False
     
     def perform_operation(self):
-        print("INPUT:", self.expression)
         try:
             self.result = self.get_system_input_representation(str(eval(self.expression.replace("/", "//"))))
             self.expression = str(self.result)
             self.last_number = str(self.result)
-            print("Result:", self.result)
         except:
-            print("Wrong expression:", self.expression)
             self.result = 0
             self.expression = "0"
             self.last_number = "0"
