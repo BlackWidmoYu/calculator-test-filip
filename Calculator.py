@@ -1,5 +1,6 @@
 import tkinter as tk
 from enum import Enum, auto
+import sys
 
 class NumericSystem(Enum):
     BIN = ("01", 2)
@@ -8,10 +9,10 @@ class NumericSystem(Enum):
     OCT = ("01234567", 8)
 
 class DataType(Enum):
-    byte  = '8'
-    word  = '16'
-    dword = '32'
-    qword = '64'
+    byte  = '1'
+    word  = '2'
+    dword = '4'
+    qword = '8'
 
 class Sign(Enum):
     POSITIVE = auto()
@@ -27,6 +28,10 @@ class Operation(Enum):
     XOR = '^'
     NONE = 'NONE'
 
+def twos(val_str, bytes):
+    val = int(val_str, 2)
+    b = val.to_bytes(bytes, byteorder=sys.byteorder, signed=False)                                                          
+    return int.from_bytes(b, byteorder=sys.byteorder, signed=True)
 
 class Calculator:
     def __init__(self):
@@ -38,6 +43,61 @@ class Calculator:
         self.numeric_system = NumericSystem.DEC
         self.sign = Sign.POSITIVE
         self.data_type = DataType.qword
+
+        # Data types
+        self.max_value = self.get_current_max_value()
+        self.binary_representation = '0' * 64
+        self.update_binary_representation()
+
+    def get_current_max_value(self):
+        if self.data_type == DataType.byte:
+            return 2**7 - 1
+        elif self.data_type == DataType.word:
+            return 2**15 - 1
+        elif self.data_type == DataType.dword:
+            return 2**31 - 1
+        elif self.data_type == DataType.qword:
+            return 2**63 - 1
+        
+    def get_current_min_value(self):
+        if self.data_type == DataType.byte:
+            return -2**7
+        elif self.data_type == DataType.word:
+            return -2**15
+        elif self.data_type == DataType.dword:
+            return -2**31
+        elif self.data_type == DataType.qword:
+            return -2**63
+        
+    def update_binary_representation(self):
+        old_binary_representation = self.binary_representation
+        numeric_value = int(self.last_number, self.numeric_system.value[1])
+        
+        data_type_length = int(self.data_type.value) * 8
+        
+        if self.sign == Sign.NEGATIVE:
+            max_value = 2 ** data_type_length
+            numeric_value = (numeric_value + max_value) % max_value
+
+        binary_representation = bin(numeric_value)[2:].zfill(data_type_length)
+
+        if not self.is_binary_representation_within_bounds():
+            print(f"Input exceeds the maximum value or minimum value for {int(self.data_type.value) * 8} data type.")
+            self.expression = str(self.get_system_input_representation(old_binary_representation, 2))
+            self.last_number = str(self.get_system_input_representation(old_binary_representation, 2))
+            self.binary_representation = old_binary_representation
+            return False
+
+        self.binary_representation = binary_representation
+        print(self.binary_representation)
+        
+    def is_binary_representation_within_bounds(self):
+        print("Abs: ", abs(int(self.last_number, self.numeric_system.value[1])))
+        print("Max value: ", self.max_value)
+        return int(self.last_number, self.numeric_system.value[1]) <= self.max_value and int(self.last_number, self.numeric_system.value[1]) >= self.get_current_min_value()
+
+    def update_max_value(self):
+        self.max_value = self.get_current_max_value()
     
     def is_input_valid(self, input):
         for char in input:
@@ -57,11 +117,13 @@ class Calculator:
 
     def add_input(self, input):
         zeroes = ("0", "0b0", "0x0", "0o0")
+
         if (self.is_input_valid(input)):
             number = self.get_system_input_representation(input, self.numeric_system.value[1])
             if self.expression in zeroes:
                 self.expression = str(number)
                 self.last_number = str(number)
+                self.update_binary_representation()
                 return True
             else:
                 if self.change_number:
@@ -71,11 +133,13 @@ class Calculator:
                 else:
                     self.last_number += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
                     self.expression += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
+                self.update_binary_representation()
                 return True
         elif input != Operation.NONE.value[0] and any(input in member.value[0] for member in Operation):
             self.expression += input
             self.operation = input
             self.change_number = True
+            self.update_binary_representation()
             return True
         else:
             print("Wrong input:", input)
@@ -93,6 +157,13 @@ class Calculator:
             self.result = 0
             self.expression = "0"
             self.last_number = "0"
+
+        if str(self.result).startswith('-'):
+            self.sign = Sign.NEGATIVE
+        else:
+            self.sign = Sign.POSITIVE
+        
+        self.update_binary_representation()
         self.operation = Operation.NONE.value[0]
     
     def clear_entry(self):
@@ -103,6 +174,27 @@ class Calculator:
 
     def get_result(self):
         return self.result
+    
+    def change_data_type(self, new_data_type):
+        if isinstance(new_data_type, DataType):
+            old_data_type = self.data_type
+            old_sign_bit = self.binary_representation[0]
+            self.data_type = new_data_type
+            self.update_max_value()
+            if int(self.data_type.value) < int(old_data_type.value):
+                self.last_number = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value)))))
+                self.expression = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value)))))
+            print("Changed to ", self.last_number)
+
+            if old_sign_bit == '1' or int(self.last_number, self.numeric_system.value[1]) < 0:
+                self.sign = Sign.NEGATIVE
+            else:
+                self.sign = Sign.POSITIVE
+            self.update_binary_representation()
+
+            print("Changed Data Type to:", new_data_type)
+        else:
+            print("Wrong data type:", new_data_type)
     
     def change_numeric_system(self, new_numeric_system):
         if isinstance(new_numeric_system, NumericSystem):
@@ -118,12 +210,16 @@ class CalculatorGUI(tk.Tk):
         super().__init__()
 
         self.calculator = calculator
+        self.geometry("700x450")
 
         self.title("Calculator")
         self.resizable(False, False)
 
         self.result_var = tk.StringVar()
         self.result_var.set("0")
+
+        self.binary_label_var = tk.StringVar()
+        self.binary_label_var.set("0000000000000000000000000000000000000000000000000000000000000000")
 
         self.create_widgets()
 
@@ -136,37 +232,47 @@ class CalculatorGUI(tk.Tk):
                 
     def create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Arial', 14), bd=10, insertwidth=4, width=14,
-                         justify='right', state='readonly')
-        entry.grid(row=0, column=1, columnspan=5)
+                        justify='right', state='readonly')
+        entry.grid(row=0, column=0, columnspan=10, padx=0, pady=0)
+
+        binary_label_frame = tk.Frame(self)
+        binary_label_frame.grid(row=1, column=0, columnspan=10, padx=0, pady=0)
+
+        binary_label = tk.Label(binary_label_frame, textvariable=self.binary_label_var, font=('Arial', 12), bd=10, anchor='w', width=80)
+        binary_label.grid(row=1, column=0, sticky='w', columnspan=10)
+
+        numeric_buttons = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0']
+        for i, num in enumerate(numeric_buttons):
+            row_index = i // 3 + 2
+            col_index = i % 3 + 1
+            tk.Button(self, text=num, command=lambda n=num: self.on_button_click(n), width=10, height=2).grid(row=row_index, column=col_index, padx=2, pady=2)
 
         hex_buttons = ['A', 'B', 'C', 'D', 'E', 'F']
         for i, hex_num in enumerate(hex_buttons):
-            tk.Button(self, text=hex_num, command=lambda h=hex_num: self.on_button_click(h), width=2).grid(row=i+1, column=0)
-
-        numeric_buttons = [
-            '7', '8', '9',
-            '4', '5', '6',
-            '1', '2', '3',
-            '0'
-        ]
-
-        for i, num in enumerate(numeric_buttons):
-            row_index = i // 3 + 1
-            col_index = i % 3 + 2
-            tk.Button(self, text=num, command=lambda n=num: self.on_button_click(n), width=2).grid(row=row_index+2, column=col_index)
+            tk.Button(self, text=hex_num, command=lambda h=hex_num: self.on_button_click(h), width=10, height=2).grid(row=2+i, column=0, padx=2, pady=2)
 
         operation_buttons = ['+', '-', '*', '/', '&', '|', '^', '=']
         for i, op in enumerate(operation_buttons):
-            tk.Button(self, text=op, command=lambda o=op: self.on_button_click(o), width=2).grid(row=i+2 if i < 4 else i-2, column=5 if i < 4 else 6)
+            tk.Button(self, text=op, command=lambda o=op: self.on_button_click(o), width=4, height=2).grid(row=i+2 if i < 4 else i-2, column=4 if i < 4 else 5, padx=2, pady=2)
 
         system_buttons = ['Dec', 'Bin', 'Oct', 'Hex']
         for i, sys in enumerate(system_buttons):
-            tk.Button(self, text=sys, command=lambda s=sys: self.change_numeric_system(s), width=2).grid(row=7, column=i+2)
+            tk.Button(self, text=sys, command=lambda s=sys: self.change_numeric_system(s), width=10, height=2).grid(row=7, column=i+1, padx=2, pady=2)
+
+        data_type_label = tk.Label(self, text="Data Type:")
+        data_type_label.grid(row=8, column=1, sticky='e', padx=5, pady=5)
+
+        data_types = [dt.name.capitalize() for dt in DataType]
+        data_type_var = tk.StringVar()
+        data_type_var.set(self.calculator.data_type.name.capitalize())
+        data_type_dropdown = tk.OptionMenu(self, data_type_var, *data_types, command=self.change_data_type_gui)
+        data_type_dropdown.grid(row=8, column=2, sticky='w', padx=5, pady=5)
 
         # Dodaj nowy przycisk "C" do kasowania
         tk.Button(self, text="CE", command=self.clear_entry, width=2).grid(row=7, column=6)
         
         self.activate_buttons()
+
 
     def on_button_click(self, value):
         if value == '=':
@@ -174,6 +280,7 @@ class CalculatorGUI(tk.Tk):
         else:
             self.calculator.add_input(value)
         self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
+        self.binary_label_var.set(f"{self.calculator.binary_representation}")
         print("Current Expression:", self.calculator.expression)
 
     def change_numeric_system(self, system):
@@ -197,6 +304,11 @@ class CalculatorGUI(tk.Tk):
         self.calculator.clear_entry()
         self.result_var.set("0")
 
+    def change_data_type_gui(self, data_type):
+        data_type_enum = next(dt for dt in DataType if dt.name.capitalize() == data_type.capitalize())
+        self.calculator.change_data_type(data_type_enum)
+        self.binary_label_var.set(f"{self.calculator.binary_representation}")
+        print("Changed Data Type to:", data_type_enum)
 
 if __name__ == "__main__":
     calculator = Calculator()
