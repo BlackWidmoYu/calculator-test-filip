@@ -8,8 +8,8 @@ class NumericSystem(Enum):
     OCT = ("01234567", 8)
 
 class DataType(Enum):
-    byte  = '8'
-    word  = '16'
+    byte = '8'
+    word = '16'
     dword = '32'
     qword = '64'
 
@@ -94,6 +94,13 @@ class Calculator:
             self.expression = "0"
             self.last_number = "0"
         self.operation = Operation.NONE.value[0]
+    
+    def clear_entry(self):
+        self.last_number = "0"
+        self.expression = "0"
+        self.result = ""
+        self.operation = Operation.NONE.value[0]
+
     def get_result(self):
         return self.result
     
@@ -125,13 +132,13 @@ class CalculatorGUI(tk.Tk):
         for widget in self.winfo_children():
             if isinstance(widget, tk.Button) and widget.cget("text") in NumericSystem.HEX.value[0]:
                 button_text = widget.cget("text")
-                widget["state"] = tk.NORMAL if button_text in active_numbers else tk.DISABLED
+                widget["state"] = tk.NORMAL if button_text in active_numbers or button_text == "CE" else tk.DISABLED
+                
 
     def create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Arial', 14), bd=10, insertwidth=4, width=14,
                          justify='right', state='readonly')
         entry.grid(row=0, column=1, columnspan=5)
-
 
         hex_buttons = ['A', 'B', 'C', 'D', 'E', 'F']
         for i, hex_num in enumerate(hex_buttons):
@@ -157,6 +164,9 @@ class CalculatorGUI(tk.Tk):
         for i, sys in enumerate(system_buttons):
             tk.Button(self, text=sys, command=lambda s=sys: self.change_numeric_system(s), width=2).grid(row=7, column=i+2)
 
+        # Dodaj nowy przycisk "C" do kasowania
+        tk.Button(self, text="CE", command=self.clear_entry, width=2).grid(row=7, column=6)
+        
         self.activate_buttons()
 
     def on_button_click(self, value):
@@ -183,6 +193,10 @@ class CalculatorGUI(tk.Tk):
             self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
             print("Changed Numeric System to:", new_system)
             self.activate_buttons()
+
+    def clear_entry(self):
+        self.calculator.clear_entry()
+        self.result_var.set("0")
 
 
 if __name__ == "__main__":
