@@ -165,6 +165,12 @@ class Calculator:
         
         self.update_binary_representation()
         self.operation = Operation.NONE.value[0]
+    
+    def clear_entry(self):
+        self.last_number = "0"
+        self.expression = "0"
+        self.result = ""
+        self.operation = Operation.NONE.value[0]
 
     def get_result(self):
         return self.result
@@ -222,8 +228,8 @@ class CalculatorGUI(tk.Tk):
         for widget in self.winfo_children():
             if isinstance(widget, tk.Button) and widget.cget("text") in NumericSystem.HEX.value[0]:
                 button_text = widget.cget("text")
-                widget["state"] = tk.NORMAL if button_text in active_numbers else tk.DISABLED
-
+                widget["state"] = tk.NORMAL if button_text in active_numbers or button_text == "CE" else tk.DISABLED
+                
     def create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Arial', 14), bd=10, insertwidth=4, width=14,
                         justify='right', state='readonly')
@@ -262,6 +268,9 @@ class CalculatorGUI(tk.Tk):
         data_type_dropdown = tk.OptionMenu(self, data_type_var, *data_types, command=self.change_data_type_gui)
         data_type_dropdown.grid(row=8, column=2, sticky='w', padx=5, pady=5)
 
+        # Dodaj nowy przycisk "C" do kasowania
+        tk.Button(self, text="CE", command=self.clear_entry, width=2).grid(row=7, column=6)
+        
         self.activate_buttons()
 
 
@@ -290,6 +299,10 @@ class CalculatorGUI(tk.Tk):
             self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
             print("Changed Numeric System to:", new_system)
             self.activate_buttons()
+
+    def clear_entry(self):
+        self.calculator.clear_entry()
+        self.result_var.set("0")
 
     def change_data_type_gui(self, data_type):
         data_type_enum = next(dt for dt in DataType if dt.name.capitalize() == data_type.capitalize())
