@@ -62,6 +62,7 @@ class Calculator:
             if self.expression in zeroes:
                 self.expression = str(number)
                 self.last_number = str(number)
+                return True
             else:
                 if self.change_number:
                     self.last_number = str(number)
@@ -70,12 +71,15 @@ class Calculator:
                 else:
                     self.last_number += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
                     self.expression += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
+                return True
         elif input != Operation.NONE.value[0] and any(input in member.value[0] for member in Operation):
             self.expression += input
             self.operation = input
             self.change_number = True
+            return True
         else:
             print("Wrong input:", input)
+            return False
     
     def perform_operation(self):
         print("INPUT:", self.expression)
