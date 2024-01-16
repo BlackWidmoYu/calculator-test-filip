@@ -41,7 +41,8 @@ class Calculator:
 
         # Data types
         self.max_value = self.get_current_max_value()
-        self.binary_representation = "0b0"
+        self.binary_representation = '0' * 64
+        self.update_binary_representation()
 
     def get_current_max_value(self):
         if self.data_type == DataType.byte:
@@ -183,12 +184,16 @@ class CalculatorGUI(tk.Tk):
         super().__init__()
 
         self.calculator = calculator
+        self.geometry("700x450")
 
         self.title("Calculator")
         self.resizable(False, False)
 
         self.result_var = tk.StringVar()
         self.result_var.set("0")
+
+        self.binary_label_var = tk.StringVar()
+        self.binary_label_var.set("0000000000000000000000000000000000000000000000000000000000000000")
 
         self.create_widgets()
 
@@ -201,44 +206,44 @@ class CalculatorGUI(tk.Tk):
 
     def create_widgets(self):
         entry = tk.Entry(self, textvariable=self.result_var, font=('Arial', 14), bd=10, insertwidth=4, width=14,
-                         justify='right', state='readonly')
-        entry.grid(row=0, column=1, columnspan=5)
+                        justify='right', state='readonly')
+        entry.grid(row=0, column=0, columnspan=10, padx=0, pady=0)
+
+        binary_label_frame = tk.Frame(self)
+        binary_label_frame.grid(row=1, column=0, columnspan=10, padx=0, pady=0)
+
+        binary_label = tk.Label(binary_label_frame, textvariable=self.binary_label_var, font=('Arial', 12), bd=10, anchor='w', width=80)
+        binary_label.grid(row=1, column=0, sticky='w', columnspan=10)
+
+        numeric_buttons = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0']
+        for i, num in enumerate(numeric_buttons):
+            row_index = i // 3 + 2
+            col_index = i % 3 + 1
+            tk.Button(self, text=num, command=lambda n=num: self.on_button_click(n), width=10, height=2).grid(row=row_index, column=col_index, padx=2, pady=2)
 
         hex_buttons = ['A', 'B', 'C', 'D', 'E', 'F']
         for i, hex_num in enumerate(hex_buttons):
-            tk.Button(self, text=hex_num, command=lambda h=hex_num: self.on_button_click(h), width=2).grid(row=i+1, column=0)
-
-        numeric_buttons = [
-            '7', '8', '9',
-            '4', '5', '6',
-            '1', '2', '3',
-            '0'
-        ]
-
-        for i, num in enumerate(numeric_buttons):
-            row_index = i // 3 + 1
-            col_index = i % 3 + 2
-            tk.Button(self, text=num, command=lambda n=num: self.on_button_click(n), width=2).grid(row=row_index+2, column=col_index)
+            tk.Button(self, text=hex_num, command=lambda h=hex_num: self.on_button_click(h), width=10, height=2).grid(row=2+i, column=0, padx=2, pady=2)
 
         operation_buttons = ['+', '-', '*', '/', '&', '|', '^', '=']
         for i, op in enumerate(operation_buttons):
-            tk.Button(self, text=op, command=lambda o=op: self.on_button_click(o), width=2).grid(row=i+2 if i < 4 else i-2, column=5 if i < 4 else 6)
+            tk.Button(self, text=op, command=lambda o=op: self.on_button_click(o), width=4, height=2).grid(row=i+2 if i < 4 else i-2, column=4 if i < 4 else 5, padx=2, pady=2)
 
         system_buttons = ['Dec', 'Bin', 'Oct', 'Hex']
         for i, sys in enumerate(system_buttons):
-            tk.Button(self, text=sys, command=lambda s=sys: self.change_numeric_system(s), width=2).grid(row=7, column=i+2)
+            tk.Button(self, text=sys, command=lambda s=sys: self.change_numeric_system(s), width=10, height=2).grid(row=7, column=i+1, padx=2, pady=2)
 
-        # Dropdown menu for data types
         data_type_label = tk.Label(self, text="Data Type:")
-        data_type_label.grid(row=8, column=1, sticky='e')
+        data_type_label.grid(row=8, column=1, sticky='e', padx=5, pady=5)
 
         data_types = [dt.name.capitalize() for dt in DataType]
         data_type_var = tk.StringVar()
         data_type_var.set(self.calculator.data_type.name.capitalize())
         data_type_dropdown = tk.OptionMenu(self, data_type_var, *data_types, command=self.change_data_type_gui)
-        data_type_dropdown.grid(row=8, column=2, sticky='w')
+        data_type_dropdown.grid(row=8, column=2, sticky='w', padx=5, pady=5)
 
         self.activate_buttons()
+
 
     def on_button_click(self, value):
         if value == '=':
@@ -246,6 +251,7 @@ class CalculatorGUI(tk.Tk):
         else:
             self.calculator.add_input(value)
         self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
+        self.binary_label_var.set(f"{self.calculator.binary_representation}")
         print("Current Expression:", self.calculator.expression)
 
     def change_numeric_system(self, system):
@@ -268,6 +274,7 @@ class CalculatorGUI(tk.Tk):
     def change_data_type_gui(self, data_type):
         data_type_enum = next(dt for dt in DataType if dt.name.capitalize() == data_type.capitalize())
         self.calculator.change_data_type(data_type_enum)
+        self.binary_label_var.set(f"{self.calculator.binary_representation}")
         print("Changed Data Type to:", data_type_enum)
 
 if __name__ == "__main__":
