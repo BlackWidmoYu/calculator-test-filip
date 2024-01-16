@@ -28,8 +28,14 @@ class Operation(Enum):
     XOR = '^'
     NONE = 'NONE'
 
-def twos(val_str, bytes):
-    val = int(val_str, 2)
+def twos(val_str, bytes, max_value, data_type_value):
+    val = int(val_str[-int(data_type_value)*8:], 2)
+    print("Before val: ", val)
+    val_binary = str(bin(val)).replace("0b", "")
+    if val >= 0 and val_binary[0] != '1':
+        print(f"{val} % {int(max_value)}")
+        val = val % (int(max_value) + 1)
+        print("After val: ", val)
     b = val.to_bytes(bytes, byteorder=sys.byteorder, signed=False)                                                          
     return int.from_bytes(b, byteorder=sys.byteorder, signed=True)
 
@@ -92,8 +98,6 @@ class Calculator:
         print(self.binary_representation)
         
     def is_binary_representation_within_bounds(self):
-        print("Abs: ", abs(int(self.last_number, self.numeric_system.value[1])))
-        print("Max value: ", self.max_value)
         return int(self.last_number, self.numeric_system.value[1]) <= self.max_value and int(self.last_number, self.numeric_system.value[1]) >= self.get_current_min_value()
 
     def update_max_value(self):
@@ -171,6 +175,7 @@ class Calculator:
         self.expression = "0"
         self.result = ""
         self.operation = Operation.NONE.value[0]
+        self.update_binary_representation()
 
     def get_result(self):
         return self.result
@@ -182,9 +187,8 @@ class Calculator:
             self.data_type = new_data_type
             self.update_max_value()
             if int(self.data_type.value) < int(old_data_type.value):
-                self.last_number = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value)))))
-                self.expression = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value)))))
-            print("Changed to ", self.last_number)
+                self.last_number = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value), self.max_value, self.data_type.value))))
+                self.expression = str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value), self.max_value, self.data_type.value))))
 
             if old_sign_bit == '1' or int(self.last_number, self.numeric_system.value[1]) < 0:
                 self.sign = Sign.NEGATIVE
@@ -303,10 +307,14 @@ class CalculatorGUI(tk.Tk):
     def clear_entry(self):
         self.calculator.clear_entry()
         self.result_var.set("0")
+        self.binary_label_var.set(f"{self.calculator.binary_representation}")
+        
 
     def change_data_type_gui(self, data_type):
         data_type_enum = next(dt for dt in DataType if dt.name.capitalize() == data_type.capitalize())
         self.calculator.change_data_type(data_type_enum)
+        self.binary_label_var.set(f"{self.calculator.binary_representation}")
+        self.result_var.set(str(self.calculator.last_number).replace("0b", "").replace("0o", "").replace("0x", ""))
         self.binary_label_var.set(f"{self.calculator.binary_representation}")
         print("Changed Data Type to:", data_type_enum)
 
