@@ -71,7 +71,7 @@ class InputTests(unittest.TestCase):
         for character in "GHJKILXQ":
             self.assertEqual(calc.add_input(character), False)
 
-# Operacje dla roznych systemow liczbowych
+    # Operacje dla roznych systemow liczbowych
     def test_signs_input(self):
         calc = Calculator()
         for num_sys in {NumericSystem.BIN , NumericSystem.DEC , NumericSystem.OCT , NumericSystem.HEX}:
@@ -107,6 +107,18 @@ class InputTests(unittest.TestCase):
         calc.change_data_type(DataType.byte)
         calc.numeric_system=NumericSystem.DEC
         self.assertEqual(calc.add_input('128'), False)
+    
+    def test5_input_between_specific_values_range_minus_valid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.numeric_system=NumericSystem.DEC
+        self.assertEqual(calc.add_input('-128'), True)
+
+    def test6_input_between_specific_values_range_minus_invalid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.numeric_system=NumericSystem.DEC
+        self.assertEqual(calc.add_input('-129'), False)
 
 
 class NumericSystemTests(unittest.TestCase):

@@ -101,7 +101,10 @@ class Calculator:
         self.max_value = self.get_current_max_value()
     
     def is_input_valid(self, input):
-        for char in input:
+        if len(input) == 1 and input == '-':
+            return False
+
+        for char in input.replace("-", ""):
             if char not in self.numeric_system.value[0]:
                 return False
         return self.is_input_within_bounds(input)
