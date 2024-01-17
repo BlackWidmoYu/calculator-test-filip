@@ -81,7 +81,31 @@ class InputTests(unittest.TestCase):
                 calc.add_input(i)
                 self.assertEqual(calc.last_number, '0')
                 self.assertEqual(calc.operation, i)
-        
+
+    def test_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.data_type = DataType.byte
+        calc.add_input('0')
+        self.assertEqual(calc.last_number, '0')
+
+    def test2_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.data_type = DataType.byte
+        calc.add_input('00')
+        self.assertEqual(calc.last_number, '0')
+
+    def test3_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.data_type = DataType.byte
+        calc.add_input('127')
+        self.assertEqual(calc.last_number, '127')
+
+    # def test4_input_between_specific_values_range_negative(self):
+    #     calc = Calculator()
+    #     calc.data_type = DataType.byte
+    #     calc.numeric_system=NumericSystem.DEC
+    #     self.assertEqual(calc.add_input('300'), False)     
+
 
 class NumericSystemTests(unittest.TestCase):
     def test_dec_to_bin(self):
