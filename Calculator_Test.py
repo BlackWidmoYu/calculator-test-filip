@@ -70,6 +70,19 @@ class InputTests(unittest.TestCase):
         for character in "GHJKILXQ":
             self.assertEqual(calc.add_input(character), False)
 
+    def test_signs_input(self):
+        calc = Calculator()
+        for num_sys in {NumericSystem.BIN , NumericSystem.DEC , NumericSystem.OCT , NumericSystem.HEX}:
+            calc.numericSystem = num_sys
+            for i in "+-*/":
+                calc.value = '0'
+                calc.operation = ""
+
+                calc.add_input(i)
+                self.assertEqual(calc.last_number, '0')
+                self.assertEqual(calc.operation, i)
+        
+
 class NumericSystemTests(unittest.TestCase):
     def test_dec_to_bin(self):
         input_values = ['1', '12', '255', '1377']
