@@ -84,7 +84,7 @@ class Calculator:
 
         binary_representation = bin(numeric_value)[2:].zfill(data_type_length)
 
-        if not self.is_binary_representation_within_bounds():
+        if not self.is_input_within_bounds(self.last_number):
             print(f"Input exceeds the maximum value or minimum value for {int(self.data_type.value) * 8} data type.")
             self.expression = str(self.get_system_input_representation(old_binary_representation, 2))
             self.last_number = str(self.get_system_input_representation(old_binary_representation, 2))
@@ -92,9 +92,10 @@ class Calculator:
             return False
 
         self.binary_representation = binary_representation
+        return True
         
-    def is_binary_representation_within_bounds(self):
-        return int(self.last_number, self.numeric_system.value[1]) <= self.max_value and int(self.last_number, self.numeric_system.value[1]) >= self.get_current_min_value()
+    def is_input_within_bounds(self, input):
+        return int(input, self.numeric_system.value[1]) <= self.max_value and int(input, self.numeric_system.value[1]) >= self.get_current_min_value()
 
     def update_max_value(self):
         self.max_value = self.get_current_max_value()
@@ -103,7 +104,7 @@ class Calculator:
         for char in input:
             if char not in self.numeric_system.value[0]:
                 return False
-        return True
+        return self.is_input_within_bounds(input)
     
     def get_system_input_representation(self, input, old_numeric_system_value=10):
         if self.numeric_system == NumericSystem.BIN:
@@ -123,8 +124,7 @@ class Calculator:
             if self.expression in zeroes:
                 self.expression = str(number)
                 self.last_number = str(number)
-                self.update_binary_representation()
-                return True
+                return self.update_binary_representation()
             else:
                 if self.change_number:
                     self.last_number = str(number)
@@ -133,14 +133,12 @@ class Calculator:
                 else:
                     self.last_number += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
                     self.expression += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
-                self.update_binary_representation()
-                return True
+                return self.update_binary_representation()
         elif input != Operation.NONE.value[0] and any(input in member.value[0] for member in Operation):
             self.expression += input
             self.operation = input
             self.change_number = True
-            self.update_binary_representation()
-            return True
+            return self.update_binary_representation()
         else:
             # print("Wrong input:", input)
             return False
