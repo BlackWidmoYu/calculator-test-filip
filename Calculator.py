@@ -142,7 +142,7 @@ class Calculator:
             self.update_binary_representation()
             return True
         else:
-            print("Wrong input:", input)
+            # print("Wrong input:", input)
             return False
     
     def perform_operation(self):
