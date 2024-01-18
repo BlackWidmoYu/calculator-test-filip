@@ -212,8 +212,10 @@ class Calculator:
             self.update_binary_representation()
 
             print("Changed Data Type to:", new_data_type)
+            return True
         else:
             print("Wrong data type:", new_data_type)
+            return False
     
     def change_numeric_system(self, new_numeric_system):
         if isinstance(new_numeric_system, NumericSystem):

@@ -77,7 +77,7 @@ class InputTests(unittest.TestCase):
         for num_sys in {NumericSystem.BIN , NumericSystem.DEC , NumericSystem.OCT , NumericSystem.HEX}:
             calc.numericSystem = num_sys
             for i in "+-*/":
-                calc.value = '0'
+                calc.last_number = '0'
                 calc.operation = ""
 
                 calc.add_input(i)
@@ -337,7 +337,6 @@ class QwordDataTypeTests(unittest.TestCase):
         calc.add_input('0')
         calc.add_input('9')
         self.assertEqual(calc.last_number, '-922337203685477580')
-
 
 # Operacje podstawowe
 class ArithmeticOperationsTests(unittest.TestCase):
@@ -643,6 +642,441 @@ class GetCurrentMinMaxTests(unittest.TestCase):
         calc.data_type = None
         self.assertEqual(calc.get_current_min_value(), 0)
         self.assertEqual(calc.get_current_min_value(), 0)
+
+class DataTypeCastingTests(unittest.TestCase):
+    # Casting from byte to other data types
+    def test_byte_to_word1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('127')
+        self.assertEqual(calc.binary_representation, '01111111')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '127')
+        self.assertEqual(calc.binary_representation, '0000000001111111')
+    
+    def test_byte_to_word2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('-128')
+        self.assertEqual(calc.binary_representation, '10000000')
+        
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-128')
+        self.assertEqual(calc.binary_representation, '1111111110000000')
+
+    def test_byte_to_dword1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('127')
+        self.assertEqual(calc.binary_representation, '01111111')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '127')
+        self.assertEqual(calc.binary_representation, 
+                         '00000000000000000000000001111111')
+    
+    def test_byte_to_dword2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('-128')
+        self.assertEqual(calc.binary_representation, '10000000')
+        
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '-128')
+        self.assertEqual(calc.binary_representation, 
+                         '11111111111111111111111110000000')
+        
+    def test_byte_to_qword1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('127')
+        self.assertEqual(calc.binary_representation, '01111111')
+
+        self.assertEqual(calc.change_data_type(DataType.qword), True)
+        self.assertEqual(calc.last_number, '127')
+        self.assertEqual(calc.binary_representation, 
+            '0000000000000000000000000000000000000000000000000000000001111111')
+    
+    def test_byte_to_qword2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('-128')
+        self.assertEqual(calc.binary_representation, '10000000')
+        
+        self.assertEqual(calc.change_data_type(DataType.qword), True)
+        self.assertEqual(calc.last_number, '-128')
+        self.assertEqual(calc.binary_representation, 
+            '1111111111111111111111111111111111111111111111111111111110000000')
+    
+    # Casting from word to other data types
+    def test_word_to_byte1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('128')
+        self.assertEqual(calc.binary_representation, '0000000010000000')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-128')
+        self.assertEqual(calc.binary_representation, '10000000')
+
+    def test_word_to_byte2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('129')
+        self.assertEqual(calc.binary_representation, '0000000010000001')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-127')
+        self.assertEqual(calc.binary_representation, '10000001')
+
+    def test_word_to_byte3(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('255')
+        self.assertEqual(calc.binary_representation, '0000000011111111')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-1')
+        self.assertEqual(calc.binary_representation, '11111111')
+
+    def test_word_to_byte4(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('500')
+        self.assertEqual(calc.binary_representation, '0000000111110100')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-12')
+        self.assertEqual(calc.binary_representation, '11110100')
+
+    def test_word_to_byte5(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('280')
+        self.assertEqual(calc.binary_representation, '0000000100011000')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '24')
+        self.assertEqual(calc.binary_representation, '00011000')
+
+    def test_word_to_dword1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('1123')
+        self.assertEqual(calc.binary_representation, '0000010001100011')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '1123')
+        self.assertEqual(calc.binary_representation, 
+                         '00000000000000000000010001100011')
+    def test_word_to_dword2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('-23456')
+        self.assertEqual(calc.binary_representation, '1010010001100000')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '-23456')
+        self.assertEqual(calc.binary_representation, 
+                         '11111111111111111010010001100000')
+        
+    def test_word_to_qword1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('1123')
+        self.assertEqual(calc.binary_representation, '0000010001100011')
+
+        self.assertEqual(calc.change_data_type(DataType.qword), True)
+        self.assertEqual(calc.last_number, '1123')
+        self.assertEqual(calc.binary_representation, 
+            '0000000000000000000000000000000000000000000000000000010001100011')
+    def test_word_to_qword2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('-23456')
+        self.assertEqual(calc.binary_representation, '1010010001100000')
+
+        self.assertEqual(calc.change_data_type(DataType.qword), True)
+        self.assertEqual(calc.last_number, '-23456')
+        self.assertEqual(calc.binary_representation, 
+            '1111111111111111111111111111111111111111111111111010010001100000')
+    
+    # Dword casting tests
+    def test_dword_to_byte1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('128')
+        self.assertEqual(calc.binary_representation, '00000000000000000000000010000000')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-128')
+        self.assertEqual(calc.binary_representation, '10000000')
+
+    def test_dword_to_byte2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('129')
+        self.assertEqual(calc.binary_representation, '00000000000000000000000010000001')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-127')
+        self.assertEqual(calc.binary_representation, '10000001')
+
+    def test_dword_to_byte3(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('255')
+        self.assertEqual(calc.binary_representation, '00000000000000000000000011111111')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-1')
+        self.assertEqual(calc.binary_representation, '11111111')
+
+    def test_dword_to_byte4(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('500')
+        self.assertEqual(calc.binary_representation, '00000000000000000000000111110100')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-12')
+        self.assertEqual(calc.binary_representation, '11110100')
+
+    def test_dword_to_byte5(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('280')
+        self.assertEqual(calc.binary_representation, '00000000000000000000000100011000')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '24')
+        self.assertEqual(calc.binary_representation, '00011000')
+
+    def test_dword_to_word1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('1123')
+        self.assertEqual(calc.binary_representation, '00000000000000000000010001100011')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '1123')
+        self.assertEqual(calc.binary_representation, '0000010001100011')
+
+    def test_dword_to_word2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('-23456')
+        self.assertEqual(calc.binary_representation, '11111111111111111010010001100000')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-23456')
+        self.assertEqual(calc.binary_representation, '1010010001100000')
+
+    def test_dword_to_word3(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('32768')
+        self.assertEqual(calc.binary_representation, '00000000000000001000000000000000')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-32768')
+        self.assertEqual(calc.binary_representation, '1000000000000000')
+
+    def test_dword_to_word4(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('32769')
+        self.assertEqual(calc.binary_representation, '00000000000000001000000000000001')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-32767')
+        self.assertEqual(calc.binary_representation, '1000000000000001')
+
+    def test_dword_to_word5(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('65535')
+        self.assertEqual(calc.binary_representation, '00000000000000001111111111111111')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-1')
+        self.assertEqual(calc.binary_representation, '1111111111111111')
+
+    def test_dword_to_qword1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('1123')
+        self.assertEqual(calc.binary_representation, '00000000000000000000010001100011')
+
+        self.assertEqual(calc.change_data_type(DataType.qword), True)
+        self.assertEqual(calc.last_number, '1123')
+        self.assertEqual(calc.binary_representation,
+            '0000000000000000000000000000000000000000000000000000010001100011')
+
+    def test_dword_to_qword2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('-23456')
+        self.assertEqual(calc.binary_representation, '11111111111111111010010001100000')
+
+        self.assertEqual(calc.change_data_type(DataType.qword), True)
+        self.assertEqual(calc.last_number, '-23456')
+        self.assertEqual(calc.binary_representation,
+            '1111111111111111111111111111111111111111111111111010010001100000')
+        
+    def test_qword_to_byte1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('128')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000000010000000')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-128')
+        self.assertEqual(calc.binary_representation, '10000000')
+
+    def test_qword_to_byte2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('129')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000000010000001')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-127')
+        self.assertEqual(calc.binary_representation, '10000001')
+
+    def test_qword_to_byte3(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('255')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000000011111111')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-1')
+        self.assertEqual(calc.binary_representation, '11111111')
+
+    def test_qword_to_byte4(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('500')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000000111110100')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '-12')
+        self.assertEqual(calc.binary_representation, '11110100')
+
+    def test_qword_to_byte5(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('280')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000000100011000')
+
+        self.assertEqual(calc.change_data_type(DataType.byte), True)
+        self.assertEqual(calc.last_number, '24')
+        self.assertEqual(calc.binary_representation, '00011000')
+
+    def test_qword_to_word1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('1123')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000010001100011')
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '1123')
+        self.assertEqual(calc.binary_representation, '0000010001100011')\
+        
+    def test_qword_to_word2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('-23456')
+        self.assertEqual(calc.binary_representation, '1111111111111111111111111111111111111111111111111010010001100000')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-23456')
+        self.assertEqual(calc.binary_representation, '1010010001100000')
+
+    def test_qword_to_word3(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('32768')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000001000000000000000')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-32768')
+        self.assertEqual(calc.binary_representation, '1000000000000000')
+
+    def test_qword_to_word4(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('32769')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000001000000000000001')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-32767')
+        self.assertEqual(calc.binary_representation, '1000000000000001')
+
+    def test_qword_to_word5(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('65535')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000001111111111111111')
+
+        self.assertEqual(calc.change_data_type(DataType.word), True)
+        self.assertEqual(calc.last_number, '-1')
+        self.assertEqual(calc.binary_representation, '1111111111111111')
+
+    def test_qword_to_dword1(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('1123')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000000000000000000000000010001100011')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '1123')
+        self.assertEqual(calc.binary_representation,
+            '00000000000000000000010001100011')
+        
+    def test_qword_to_dword2(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('-23456')
+        self.assertEqual(calc.binary_representation, '1111111111111111111111111111111111111111111111111010010001100000')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '-23456')
+        self.assertEqual(calc.binary_representation,
+            '11111111111111111010010001100000')
+
+    def test_qword_to_dword3(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('2147483648')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000010000000000000000000000000000000')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '-2147483648')
+        self.assertEqual(calc.binary_representation,
+            '10000000000000000000000000000000')
+
+    def test_qword_to_dword4(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('2147483649')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000010000000000000000000000000000001')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '-2147483647')
+        self.assertEqual(calc.binary_representation,
+            '10000000000000000000000000000001')
+
+    def test_qword_to_dword5(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('4294967295')
+        self.assertEqual(calc.binary_representation, '0000000000000000000000000000000011111111111111111111111111111111')
+
+        self.assertEqual(calc.change_data_type(DataType.dword), True)
+        self.assertEqual(calc.last_number, '-1')
+        self.assertEqual(calc.binary_representation, '11111111111111111111111111111111')
 
 
 if __name__ == '__main__':
