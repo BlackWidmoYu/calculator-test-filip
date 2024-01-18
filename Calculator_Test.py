@@ -84,6 +84,7 @@ class InputTests(unittest.TestCase):
                 self.assertEqual(calc.last_number, '0')
                 self.assertEqual(calc.operation, i)
 
+class ByteDataTypeTests(unittest.TestCase):
     def test_input_between_specific_values_range(self):
         calc = Calculator()
         calc.change_data_type(DataType.byte)
@@ -105,176 +106,238 @@ class InputTests(unittest.TestCase):
     def test4_input_between_specific_values_range_negative(self):
         calc = Calculator()
         calc.change_data_type(DataType.byte)
-        calc.numeric_system=NumericSystem.DEC
         self.assertEqual(calc.add_input('128'), False)
     
     def test5_input_between_specific_values_range_minus_valid(self):
         calc = Calculator()
         calc.change_data_type(DataType.byte)
-        calc.numeric_system=NumericSystem.DEC
         self.assertEqual(calc.add_input('-128'), True)
         self.assertEqual(calc.last_number, '-128')
 
     def test6_input_between_specific_values_range_minus_invalid(self):
         calc = Calculator()
         calc.change_data_type(DataType.byte)
-        calc.numeric_system=NumericSystem.DEC
         self.assertEqual(calc.add_input('-129'), False)
 
+    def test7_acceptable_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('2')
+        calc.add_input('2')
+        calc.add_input('2')
+        self.assertEqual(calc.last_number, '22')
 
-class NumericSystemTests(unittest.TestCase):
-    def test_dec_to_bin(self):
-        input_values = ['1', '12', '255', '1377']
-        expected_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+    def test8_acceptable_negative_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        calc.add_input('-1')
+        calc.add_input('2')
+        calc.add_input('9')
+        self.assertEqual(calc.last_number, '-12')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.BIN)
+class WordDataTypeTests(unittest.TestCase):
+    def test_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.add_input('0'), True)
+        self.assertEqual(calc.last_number, '0')
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.BIN)
+    def test2_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.add_input('00'), True)
+        self.assertEqual(calc.last_number, '0')
+
+    def test3_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.add_input('32767'), True)
+        self.assertEqual(calc.last_number, '32767')
+
+    def test4_input_between_specific_values_range_negative(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.add_input('32768'), False)
     
-    def test_dec_to_hex(self):
-        input_values = ['1', '12', '255', '1377']
-        expected_values = ['0x1', '0xC', '0xFF', '0x561']
+    def test5_input_between_specific_values_range_minus_valid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.add_input('-32768'), True)
+        self.assertEqual(calc.last_number, '-32768')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.HEX)
+    def test6_input_between_specific_values_range_minus_invalid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.add_input('-32769'), False)
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.HEX)
+    def test7_acceptable_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('3')
+        calc.add_input('2')
+        calc.add_input('7')
+        calc.add_input('9')
+        calc.add_input('9')
+        self.assertEqual(calc.last_number, '3279')
 
-    def test_dec_to_oct(self):
-        input_values = ['1', '12', '255', '1377']
-        expected_values = ['0o1', '0o14', '0o377', '0o2541']
+    def test8_acceptable_negative_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        calc.add_input('-3')
+        calc.add_input('2')
+        calc.add_input('7')
+        calc.add_input('9')
+        calc.add_input('9')
+        self.assertEqual(calc.last_number, '-3279')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.OCT)
+class DwordDataTypeTests(unittest.TestCase):
+    def test_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.add_input('0'), True)
+        self.assertEqual(calc.last_number, '0')
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.OCT)
+    def test2_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.add_input('00'), True)
+        self.assertEqual(calc.last_number, '0')
+
+    def test3_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.add_input('2147483647'), True)
+        self.assertEqual(calc.last_number, '2147483647')
+
+    def test4_input_between_specific_values_range_negative(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.add_input('2147483648'), False)
     
-    def test_oct_to_dec(self):
-        input_values = ['0o1', '0o14', '0o377', '0o2541']
-        expected_values = ['1', '12', '255', '1377']
+    def test5_input_between_specific_values_range_minus_valid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.add_input('-2147483648'), True)
+        self.assertEqual(calc.last_number, '-2147483648')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.OCT
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.DEC)
+    def test6_input_between_specific_values_range_minus_invalid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.add_input('-2147483649'), False)
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.DEC)
+    def test7_acceptable_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('2')
+        calc.add_input('1')
+        calc.add_input('4')
+        calc.add_input('7')
+        calc.add_input('4')
+        calc.add_input('8')
+        calc.add_input('3')
+        calc.add_input('6')
+        calc.add_input('4')
+        calc.add_input('9')
+        self.assertEqual(calc.last_number, '214748364')
 
-    def test_oct_to_hex(self):
-        input_values = ['0o1', '0o14', '0o377', '0o2541']
-        expected_values = ['0x1', '0xC', '0xFF', '0x561']
+    def test8_acceptable_negative_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        calc.add_input('-2')
+        calc.add_input('1')
+        calc.add_input('4')
+        calc.add_input('7')
+        calc.add_input('4')
+        calc.add_input('8')
+        calc.add_input('3')
+        calc.add_input('6')
+        calc.add_input('4')
+        calc.add_input('9')
+        self.assertEqual(calc.last_number, '-214748364')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.OCT
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.HEX)
+class QwordDataTypeTests(unittest.TestCase):
+    def test_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.add_input('0'), True)
+        self.assertEqual(calc.last_number, '0')
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.HEX)
+    def test2_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.add_input('00'), True)
+        self.assertEqual(calc.last_number, '0')
 
-    def test_oct_to_bin(self):
-        input_values = ['0o1', '0o14', '0o377', '0o2541']
-        expected_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
+    def test3_input_between_specific_values_range(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.add_input('9223372036854775807'), True)
+        self.assertEqual(calc.last_number, '9223372036854775807')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.OCT
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.BIN)
+    def test4_input_between_specific_values_range_negative(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.add_input('9223372036854775808'), False)
+    
+    def test5_input_between_specific_values_range_minus_valid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.add_input('-9223372036854775808'), True)
+        self.assertEqual(calc.last_number, '-9223372036854775808')
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.BIN)
+    def test6_input_between_specific_values_range_minus_invalid(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.add_input('-9223372036854775809'), False)
 
-    def test_bin_to_dec(self):
-        input_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
-        expected_values = ['1', '12', '255', '1377']
+    def test7_acceptable_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('9')
+        calc.add_input('2')
+        calc.add_input('2')
+        calc.add_input('3')
+        calc.add_input('3')
+        calc.add_input('7')
+        calc.add_input('2')
+        calc.add_input('0')
+        calc.add_input('3')
+        calc.add_input('6')
+        calc.add_input('8')
+        calc.add_input('5')
+        calc.add_input('4')
+        calc.add_input('7')
+        calc.add_input('7')
+        calc.add_input('5')
+        calc.add_input('8')
+        calc.add_input('0')
+        calc.add_input('8')
+        self.assertEqual(calc.last_number, '922337203685477580')
 
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.BIN
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.DEC)
+    def test8_acceptable_negative_input(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        calc.add_input('-9')
+        calc.add_input('2')
+        calc.add_input('2')
+        calc.add_input('3')
+        calc.add_input('3')
+        calc.add_input('7')
+        calc.add_input('2')
+        calc.add_input('0')
+        calc.add_input('3')
+        calc.add_input('6')
+        calc.add_input('8')
+        calc.add_input('5')
+        calc.add_input('4')
+        calc.add_input('7')
+        calc.add_input('7')
+        calc.add_input('5')
+        calc.add_input('8')
+        calc.add_input('0')
+        calc.add_input('9')
+        self.assertEqual(calc.last_number, '-922337203685477580')
 
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.DEC)
-
-    def test_bin_to_hex(self):
-        input_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
-        expected_values = ['0x1', '0xC', '0xFF', '0x561']
-
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.BIN
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.HEX)
-
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.HEX)
-
-    def test_bin_to_oct(self):
-        input_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
-        expected_values = ['0o1', '0o14', '0o377', '0o2541']
-
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.BIN
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.OCT)
-
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.OCT)
-
-    def test_hex_to_dec(self):
-        input_values = ['0x1', '0xC', '0xFF', '0x561']
-        expected_values = ['1', '12', '255', '1377']
-
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.HEX
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.DEC)
-
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.DEC)
-
-    def test_hex_to_oct(self):
-        input_values = ['0x1', '0xC', '0xFF', '0x561']
-        expected_values = ['0o1', '0o14', '0o377', '0o2541']
-
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.HEX
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.OCT)
-
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.OCT)
-
-    def test_hex_to_bin(self):
-        input_values = ['0x1', '0xC', '0xFF', '0x561']
-        expected_values = ['0b1', '0b1100', '0b11111111', '0b10101100001']
-
-        for i in range(len(input_values)):
-            calc = Calculator()
-            calc.numeric_system = NumericSystem.HEX
-            calc.last_number = input_values[i]
-            calc.change_numeric_system(NumericSystem.BIN)
-
-            self.assertEqual(calc.last_number, expected_values[i])
-            self.assertEqual(calc.numeric_system, NumericSystem.BIN)
 
 # Operacje podstawowe
 class ArithmeticOperationsTests(unittest.TestCase):
