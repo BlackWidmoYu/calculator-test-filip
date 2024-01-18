@@ -86,8 +86,13 @@ class Calculator:
 
         if not self.is_input_within_bounds(self.last_number):
             print(f"Input exceeds the maximum value or minimum value for {int(self.data_type.value) * 8} data type.")
-            self.expression = str(self.get_system_input_representation(old_binary_representation, 2))
-            self.last_number = str(self.get_system_input_representation(old_binary_representation, 2))
+            if self.sign == Sign.POSITIVE:
+                self.expression = str(self.get_system_input_representation(old_binary_representation, 2))
+                self.last_number = str(self.get_system_input_representation(old_binary_representation, 2))
+            elif self.sign == Sign.NEGATIVE:
+                self.expression =  str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value), self.max_value, self.data_type.value))))
+                self.last_number =  str(self.get_system_input_representation(str(twos(self.binary_representation, int(self.data_type.value), self.max_value, self.data_type.value))))
+                
             self.binary_representation = old_binary_representation
             return False
 
@@ -127,7 +132,6 @@ class Calculator:
             if self.expression in zeroes:
                 self.expression = str(number)
                 self.last_number = str(number)
-                return self.update_binary_representation()
             else:
                 if self.change_number:
                     self.last_number = str(number)
@@ -136,14 +140,27 @@ class Calculator:
                 else:
                     self.last_number += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
                     self.expression += str(number).replace("0o", "").replace("0x", "").replace("0b", "")
-                return self.update_binary_representation()
+            if self.last_number.startswith('-'):
+                self.sign = Sign.NEGATIVE
+            else:
+                self.sign = Sign.POSITIVE
+            return self.update_binary_representation()
+        elif self.expression in zeroes and input == Operation.SUB.value:
+            self.expression = str(input)
+            self.last_number = str(input)
+            self.sign = Sign.NEGATIVE
         elif input != Operation.NONE.value[0] and any(input in member.value[0] for member in Operation):
             self.expression += input
             self.operation = input
             self.change_number = True
+            if self.last_number.startswith('-'):
+                self.sign = Sign.NEGATIVE
+            else:
+                self.sign = Sign.POSITIVE
             return self.update_binary_representation()
         else:
             # print("Wrong input:", input)
+            self.sign = Sign.POSITIVE
             return False
     
     def perform_operation(self):
