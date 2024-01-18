@@ -61,6 +61,8 @@ class Calculator:
             return 2**31 - 1
         elif self.data_type == DataType.qword:
             return 2**63 - 1
+        else:
+            return 0
         
     def get_current_min_value(self):
         if self.data_type == DataType.byte:
@@ -71,6 +73,8 @@ class Calculator:
             return -2**31
         elif self.data_type == DataType.qword:
             return -2**63
+        else:
+            return 0
         
     def update_binary_representation(self):
         old_binary_representation = self.binary_representation

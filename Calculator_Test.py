@@ -534,7 +534,52 @@ class BinaryOperationsTests(unittest.TestCase):
         calc.perform_operation()
         self.assertEqual(str(calc.get_result()), '0x6')  # 6 in hexadecimal
 
+class GetCurrentMinMaxTests(unittest.TestCase):
+    def test_byte_max_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        self.assertEqual(calc.get_current_max_value(), 2**7 - 1)
 
+    def test_byte_min_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.byte)
+        self.assertEqual(calc.get_current_min_value(), -2**7)
+
+    def test_word_max_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.get_current_max_value(), 2**15 - 1)
+
+    def test_word_min_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.word)
+        self.assertEqual(calc.get_current_min_value(), -2**15)
+
+    def test_dword_max_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.get_current_max_value(), 2**31 - 1)
+
+    def test_dword_min_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.dword)
+        self.assertEqual(calc.get_current_min_value(), -2**31)
+
+    def test_qword_max_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.get_current_max_value(), 2**63 - 1)
+
+    def test_qword_min_value(self):
+        calc = Calculator()
+        calc.change_data_type(DataType.qword)
+        self.assertEqual(calc.get_current_min_value(), -2**63)
+
+    def test_invalid_data_type(self):
+        calc = Calculator()
+        calc.data_type = None
+        self.assertEqual(calc.get_current_min_value(), 0)
+        self.assertEqual(calc.get_current_min_value(), 0)
 
 
 if __name__ == '__main__':
